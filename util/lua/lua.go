@@ -255,9 +255,11 @@ func cleanReturnedArray(newObj, obj []interface{}) []interface{} {
 	for i := range newObj {
 		switch newValue := newObj[i].(type) {
 		case map[string]interface{}:
-			if oldValue, ok := obj[i].(map[string]interface{}); ok {
-				convertedMap := cleanReturnedObj(newValue, oldValue)
-				arrayToReturn[i] = convertedMap
+			if len(obj) > i {
+				if oldValue, ok := obj[i].(map[string]interface{}); ok {
+					convertedMap := cleanReturnedObj(newValue, oldValue)
+					arrayToReturn[i] = convertedMap
+				}
 			}
 		case []interface{}:
 			if oldValue, ok := obj[i].([]interface{}); ok {

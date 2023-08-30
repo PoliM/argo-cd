@@ -757,3 +757,62 @@ return hs`
 		assert.Nil(t, status)
 	})
 }
+
+const objSyncWindowsNil = `
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: test
+spec:
+  destinations: {}
+  # syncWindows:
+`
+
+const objSyncWindowsEmpty = `
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: test
+spec:
+  destinations: {}
+  syncWindows: []
+`
+
+const addToSyncWindow = `
+newSyncWindow = {}
+newSyncWindow.duration = "1h"
+if obj.spec.syncWindows == nil then
+  obj.spec.syncWindows = {}
+end
+table.insert(obj.spec.syncWindows, newSyncWindow)
+return obj
+`
+
+const objSyncWindowsExpected = `
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: test
+spec:
+  destinations: {}
+  syncWindows:
+  - duration: 1h
+`
+
+func TestAddToArrayNil(t *testing.T) {
+	testObj := StrToUnstructured(objSyncWindowsNil)
+	expectedObj := StrToUnstructured(objSyncWindowsExpected)
+	vm := VM{}
+	newObj, err := vm.ExecuteResourceAction(testObj, addToSyncWindow)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedObj, newObj)
+}
+
+func TestAddToArrayEmpty(t *testing.T) {
+	testObj := StrToUnstructured(objSyncWindowsEmpty)
+	expectedObj := StrToUnstructured(objSyncWindowsExpected)
+	vm := VM{}
+	newObj, err := vm.ExecuteResourceAction(testObj, addToSyncWindow)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedObj, newObj)
+}
